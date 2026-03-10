@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SMK AI &#9889; Teknik Instalasi Tenaga Listrik</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body>
+    <div class="app">
+        <!-- HEADER -->
+        <header>
+            <button class="hamburger" onclick="toggleSidebar()">?</button>
+            <div class="logo">&#9889;</div>
+            <div class="logo-info">
+                <h1>SMK AI Learning Assistant</h1>
+                <p>Teknik Instalasi Tenaga Listrik</p>
+            </div>
+            <div class="header-gap"></div>
+            <div class="teacher-bar">
+                <span class="teacher-label">&#128104;&#8205;&#127979; Guru Aktif:</span>
+                <div class="teacher-btns" id="teacherBtns"></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-left:10px">
+                <div class="sdot" id="sdot"></div>
+                <span style="font-size:11px;color:var(--tx3)" id="stext">Belum terhubung</span>
+            </div>
+            <button class="hdr-btn" onclick="openSupabase()">☁️ Sync</button>
+            <button class="hdr-btn" onclick="openProgress()">&#128202; Progress</button>
+            <button class="hdr-btn danger" onclick="openHandover()">&#128221; Selesai Mengajar</button>
+            <button class="hdr-btn" onclick="openTeachers()">&#128104;&#8205;&#127979; Guru</button>
+            <button class="hdr-btn" onclick="openSettings()">&#9881;&#65039; Multi-API</button>
+        </header>
+
+        <!-- SIDEBAR OVERLAY (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebarEl">
+            <div class="sec">
+                <div class="sec-label">Fase E &#8212; Kelas 1 <span class="pb pb-e">9 Topik</span></div>
+                <div id="listE"></div>
+            </div>
+            <div class="sec">
+                <div class="sec-label">Fase F &#8212; Kelas 2 &amp; 3 <span class="pb pb-f">7 Topik</span></div>
+                <div id="listF"></div>
+            </div>
+            <div class="qa">
+                <div class="sec-label" style="margin-bottom:7px">Tanya Cepat</div>
+                <button class="qb" onclick="qa('Mulai dari mana mengajar untuk kelas baru?')">&#128640; Mulai dari
+                    mana?</button>
+                <button class="qb"
+                    onclick="qa('Berdasarkan progress yang ada, topik apa yang harus diajarkan berikutnya?')">&#10145;&#65039;
+                    Topik
+                    selanjutnya?</button>
+                <button class="qb" onclick="qa('Topik mana yang menjadi prasyarat untuk materi instalasi?')">&#128295;
+                    Materi
+                    prasyarat</button>
+                <button class="qb"
+                    onclick="qa('Buatkan ringkasan progress belajar saat ini dan rekomendasi selanjutnya')">Y"<
+                        Ringkasan progress</button>
+                        <button class="qb"
+                            onclick="qa('Berapa total jam pelajaran yang sudah selesai dan yang tersisa?')">⌛
+                            Jam tersisa</button>
+            </div>
+        </aside>
+
+        <!-- CHAT -->
+        <main class="chat">
+            <div class="pbanner" id="progressBanner">
+                <span id="pText">0 dari 16 topik selesai</span>
+                <div class="pbar-track">
+                    <div class="pbar-fill" id="pfill" style="width:0%"></div>
+                </div>
+                <span id="pTeacherInfo" style="color:var(--a2);font-weight:600"></span>
+            </div>
+            <div class="msgs" id="msgs">
+                <div class="welcome" id="wc">
+                    <div style="font-size:44px;margin-bottom:10px">&#9889;</div>
+                    <h2>Asisten Pembelajaran 3 Guru</h2>
+                    <p>Pilih guru yang aktif mengajar, lalu tanya apa saja ?" AI akan membantu merencanakan,
+                        melanjutkan,
+                        dan mencatat progress pembelajaran bersama.</p>
+                    <div class="chips">
+                        <button class="chip" onclick="qa('Mulai dari mana mengajar untuk kelas baru?')">&#128640; Mulai
+                            dari
+                            mana?</button>
+                        <button class="chip"
+                            onclick="qa('Berdasarkan progress yang ada, apa yang harus diajarkan berikutnya?')">&#10145;&#65039;
+                            Lanjut materi apa?</button>
+                        <button class="chip" onclick="qa('Buatkan jadwal pembagian topik untuk 3 guru')">&#128101; Bagi
+                            topik
+                            3
+                            guru</button>
+                        <button class="chip"
+                            onclick="qa('Jelaskan materi K3LH dan hubungannya dengan topik lain')">&#128214; Materi
+                            K3LH</button>
+                    </div>
+                    <p style="margin-top:14px;font-size:11px;color:var(--a1)">&#9888;&#65039; Atur API Key di menu
+                        <strong>&#9881;&#65039; API</strong> untuk mulai
+                    </p>
+                </div>
+            </div>
+            <div class="inp-area">
+                <div class="inp-row">
+                    <textarea class="inp" id="inp"
+                        placeholder="Tanya tentang urutan belajar, progress materi, atau rencana mengajar..." rows="1"
+                        onkeydown="hk(event)" oninput="ar(this)"></textarea>
+                    <button class="send" id="sbtn" onclick="send()">z</button>
+                </div>
+                <div class="inp-hint">Enter kirim · Shift+Enter baris baru</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MULTI-API SETTINGS MODAL -->
+    <div class="ov h" id="mSettings">
+        <div class="modal" style="width:560px">
+            <h2>&#9881;&#65039; Multi-API Load Balancing</h2>
+            <p class="sub">Tambahkan beberapa API ?" request di-rotate otomatis (round-robin). Jika satu gagal,
+                otomatis
+                fallback ke API berikutnya.</p>
+            <div class="sec-label" style="margin-bottom:8px">API Terdaftar</div>
+            <div id="apiList"></div>
+            <div style="border-top:1px solid var(--border);margin:14px 0 12px;padding-top:14px">
+                <div class="sec-label" style="margin-bottom:10px">&#10133; Tambah API Baru</div>
+                <div class="fg"><label>Nama / Label</label><input id="newName"
+                        placeholder="Groq Utama, Gemini Cadangan..." /></div>
+                <div class="fg"><label>Provider</label>
+                    <select id="newProv" title="Pilih Provider API" onchange="onProv()">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI (ChatGPT)</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="groq">Groq</option>
+                        <option value="cerebras">Cerebras</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="chutes">Chutes.ai</option>
+                        <option value="together">Together AI</option>
+                    </select>
+                </div>
+                <div class="fg"><label>Model</label><select id="newMdl" title="Pilih Model AI"></select></div>
+                <div class="fg"><label>API Key</label><input type="password" id="newKey"
+                        placeholder="Masukkan API Key..." /></div>
+                <button class="btn-p" style="width:100%;margin-top:4px" onclick="addApiCfg()">&#10133; Tambahkan ke Load
+                    Balancer</button>
+            </div>
+            <div class="macts"><button class="btn-c" onclick="cls('mSettings')">Tutup</button></div>
+        </div>
+    </div>
+
+    <!-- TEACHER SETTINGS MODAL -->
+    <div class="ov h" id="mTeachers">
+        <div class="modal">
+            <h2>&#128104;&#8205;&#127979; Pengaturan Guru</h2>
+            <p class="sub">Edit nama guru, tambah atau hapus. Perubahan nama otomatis memperbarui log historis.</p>
+            <div id="teacherList"></div>
+            <button class="btn-c" style="width:100%;margin-top:8px" onclick="addTeacher()">&#10133; Tambah Guru</button>
+            <div class="macts">
+                <button class="btn-c" onclick="cls('mTeachers')">Batal</button>
+                <button class="btn-p" onclick="applyTeachers()">&#9989; Simpan</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- SUPABASE SYNC MODAL -->
+    <div class="ov h" id="mSupabase">
+        <div class="modal">
+            <h2>&#9729;&#65039; Supabase Cloud Sync</h2>
+            <p class="sub">Hubungkan ke Supabase agar data sync antar perangkat. Data lokal tetap tersimpan sebagai
+                cadangan.</p>
+            <div id="sbSyncStatus"></div>
+            <div class="fg"><label>Supabase Project URL</label><input id="sbUrl"
+                    placeholder="https://xxxxx.supabase.co" /></div>
+            <div class="fg"><label>Anon Public Key</label><input id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIs..." />
+            </div>
+            <div class="macts">
+                <button class="btn-c" onclick="disconnectSupabase()">Putuskan</button>
+                <button class="btn-c" onclick="cls('mSupabase')">Batal</button>
+                <button class="btn-p" onclick="connectSupabase()">&#9889; Hubungkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROGRESS MODAL -->
+    <div class="ov h" id="mProgress">
+        <div class="modal" style="width:620px">
+            <h2>&#128202; Progress Pembelajaran</h2>
+            <p class="sub">Klik topik untuk ubah status. Hijau = Selesai &#183; Kuning = Sedang Berjalan &#183; Abu =
+                Belum</p>
+            <div class="tp-grid" id="tpGrid"></div>
+            <div class="legend">
+                <div class="leg">
+                    <div class="ld" style="background:var(--a3)"></div>Selesai
+                </div>
+                <div class="leg">
+                    <div class="ld" style="background:#e3b341"></div>Sedang Berjalan
+                </div>
+                <div class="leg">
+                    <div class="ld" style="background:var(--border)"></div>Belum Mulai
+                </div>
+            </div>
+            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+                <div class="sec-label" style="margin-bottom:8px">&#128221; Log Handover (Catatan Antar Guru)</div>
+                <div class="hlog" id="hlogView"></div>
+                <div style="font-size:10px;color:var(--tx3);margin-top:6px" id="emptyLog">Belum ada catatan handover.
+                </div>
+            </div>
+            <div class="macts">
+                <button class="btn-c" onclick="cls('mProgress')">Tutup</button>
+                <button class="btn-p" onclick="exportData()">&#11015;&#65039; Export Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HANDOVER MODAL -->
+    <div class="ov h" id="mHandover">
+        <div class="modal">
+            <h2>&#128221; Selesai Mengajar</h2>
+            <p class="sub">Catat apa yang sudah diajarkan hari ini agar guru berikutnya bisa melanjutkan.</p>
+            <div class="fg"><label>Guru yang mengajar</label>
+                <select id="hTeacher" title="Pilih guru yang mengajar">
+                    <option value="Guru 1">Guru 1</option>
+                    <option value="Guru 2">Guru 2</option>
+                    <option value="Guru 3">Guru 3</option>
+                </select>
+            </div>
+            <div class="fg"><label>Topik yang sudah diajarkan hari ini</label>
+                <select id="hTopic" title="Pilih topik yang sudah diajarkan">
+                    <option value="">-- Pilih topik --</option>
+                </select>
+            </div>
+            <div class="fg"><label>Status topik tersebut</label>
+                <select id="hStatus" title="Status topik">
+                    <option value="wip">&#128993; Masih berlanjut (belum selesai)</option>
+                    <option value="done">&#9989; Selesai</option>
+                </select>
+            </div>
+            <div class="fg"><label>Catatan untuk guru berikutnya</label>
+                <textarea id="hNotes" rows="4"
+                    placeholder="Contoh: Sudah sampai sub-bab rangkaian seri, siswa perlu latihan soal Hukum Ohm lagi..."></textarea>
+            </div>
+            <div class="macts">
+                <button class="btn-c" onclick="cls('mHandover')">Batal</button>
+                <button class="btn-p" onclick="saveHandover()">&#9989; Simpan Catatan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUIZ GAME MODAL -->
+    <div class="ov quiz-ov h" id="mQuiz">
+        <div class="modal" style="width:680px">
+            <h2>⚡ SMK AI Quiz Master</h2>
+            <p class="sub" id="quizSub">Menyiapkan pertanyaan kuis untuk topik terpilih...</p>
+            <div id="quizContent">
+                <div class="quiz-container" id="quizGame">
+                    <!-- Dinamis via JS -->
+                    <div style="padding:40px;text-align:center">
+                        <div class="tdots">
+                            <div class="td"></div>
+                            <div class="td"></div>
+                            <div class="td"></div>
+                        </div>
+                        <p style="margin-top:15px;color:var(--tx3)">AI sedang merancang soal untukmu...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="macts">
+            <button class="btn-c" onclick="cls('mQuiz')">Keluar Game</button>
+        </div>
+    </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>
